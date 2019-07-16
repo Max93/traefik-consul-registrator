@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  traefik:
+    image: traefik
+    depends_on:
+      - consul
+      - registrator
+    ports:
+      - 8080:8080
+      - 80:80
+    volumes:
+      - $PWD/traefik.toml:/etc/traefik/traefik.toml
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  consul:
+    image: consul
+    ports:
+      - 8500:8500
+
+  registrator:
+    image: gliderlabs/registrator
+    depends_on:
+      - consul
+    volumes:
+       - /var/run/docker.sock:/tmp/docker.sock
+    command: "-internal=true consul://consul:8500"
+
+#random services
+  whoami:
+    image: containous/whoami
+    labels:
+      SERVICE_NAME: "random_service"
